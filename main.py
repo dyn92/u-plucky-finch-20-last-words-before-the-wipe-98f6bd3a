@@ -8,6 +8,7 @@ for local runs).
 Pure Python standard library, deterministic: the same bytes every run.
 """
 
+import hashlib
 import os
 import sys
 
@@ -28,6 +29,8 @@ def self_check(text):
         raise ValueError("leading or trailing whitespace")
     if "  " in text:
         raise ValueError("double space")
+    if any(ord(ch) < 32 or ord(ch) == 127 for ch in text):
+        raise ValueError("control character")
 
 
 def main():
@@ -46,7 +49,8 @@ def main():
         raise ValueError("written bytes do not match")
     if written.decode("utf-8") != LINE:
         raise ValueError("written text does not round-trip")
-    print("%s (%d chars)" % (LINE, len(LINE)))
+    print("%s (%d chars, %d bytes, sha256 %s)"
+          % (LINE, len(LINE), len(data), hashlib.sha256(data).hexdigest()))
     return 0
 
 
